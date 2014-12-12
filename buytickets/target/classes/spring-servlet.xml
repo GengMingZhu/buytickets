@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Spring扫描配置 @author zbn @create 2012-4-1 1:11:17 -->
+<beans
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.1.xsd 
+		http://www.springframework.org/schema/oxm 
+		http://www.springframework.org/schema/oxm/spring-oxm-3.1.xsd
+		http://www.springframework.org/schema/cache
+        http://www.springframework.org/schema/cache/spring-cache-3.2.xsd"
+        xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns="http://www.springframework.org/schema/beans">
+	<tx:annotation-driven transaction-manager="transactionManager"
+		proxy-target-class="true" />
+	<!-- 启用spring mvc 注解 -->
+	<context:annotation-config />
+
+	<mvc:resources location="classpath:/applets/" mapping="/applets/**"/>
+	<!-- <mvc:default-servlet-handler /> -->
+	
+	<!-- 启动包扫描功能，以便注册带有@Controller、@Service、@repository、@Component等注解的类成为spring的bean -->
+	<context:component-scan base-package="com.sinosoft.ie">
+		<!-- <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" 
+			/> -->
+		<!-- <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" 
+			/> <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" 
+			/> -->
+	</context:component-scan>
+
+	<!-- 启动注解驱动的Spring MVC功能，注册请求url和注解POJO类方法的映射 -->
+	<mvc:annotation-driven />
+	 <!-- 缓存注解驱动 -->
+    <cache:annotation-driven cache-manager="cacheManager"/>
+	<!-- <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" 
+		/> <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"> 
+		<property name="messageConverters"> <list> <bean class="org.springframework.http.converter.StringHttpMessageConverter"> 
+		<property name="supportedMediaTypes"> <list> <bean class="org.springframework.http.MediaType"> 
+		<constructor-arg index="0" value="text" /> <constructor-arg index="1" value="plain" 
+		/> <constructor-arg index="2" value="UTF-8" /> </bean> <bean class="org.springframework.http.MediaType"> 
+		<constructor-arg index="0" value="*" /> <constructor-arg index="1" value="*" 
+		/> <constructor-arg index="2" value="UTF-8" /> </bean> </list> </property> 
+		</bean> </list> </property> </bean> -->
+
+	<!-- <mvc:interceptors>
+		操作日志拦截器
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean class="com.sinosoft.ie.interceptor.OpLogInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors> -->
+	<!-- 现spring完成内容协商(content negotiation)的工作是由ContentNegotiatingViewResolver来完成的. 
+		ContentNegotiatingViewResolver是根据客户提交的MimeType(如 text/html,application/xml)来跟服务端的一组viewResover的MimeType相比较, 
+		如果符合,即返回viewResover的数据.而 /user/123.xml, ContentNegotiatingViewResolver会首先将 
+		.xml 根据mediaTypes属性将其转换成 application/xml,然后完成前面所说的比较 -->
+	<!-- 对模型视图名称的解析，在请求时模型视图名称添加前后缀 -->
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"
+		id="contentNegotiatingViewResolver">
+
+		<!-- 设置为true以忽略对Accept Header的支持 -->
+		<property name="ignoreAcceptHeader" value="false" />
+
+		<!-- 用于开启 /user/123?format=json 的支持 -->
+		<!-- 用于开启 /user/123?format=xml 的支持 -->
+		<!-- 用于开启 /user/123?format=html 的支持 -->
+		<property name="favorParameter" value="false" />
+
+		<!-- true，开启扩展名支持，false关闭支持 -->
+		<property name="favorPathExtension" value="true" />
+
+		<!-- 扩展名至mimeType的映射,即 /user.json => application/json -->
+		<!-- 扩展名至mimeType的映射,即 /user.xml => application/xml -->
+		<!-- 暂时只支持json和xml -->
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<!-- <entry key="xml" value="application/xml" /> -->
+			</map>
+		</property>
+
+		<!-- 在没有扩展名时即: "/user/1" 时的默认展现形式 -->
+		<property name="defaultContentType" value="text/html" />
+		<property name="defaultViews">
+			<list>
+				<!-- json视图 -->
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+				<!-- xml视图，XStreamMarshaller，可以转换任何形式的java对象 <bean class="org.springframework.web.servlet.view.xml.MarshallingView"> 
+					<constructor-arg> <bean class="org.springframework.oxm.xstream.XStreamMarshaller"> 
+					<property name="autodetectAnnotations" value="true" /> </bean> </constructor-arg> 
+					</bean> -->
+			</list>
+		</property>
+		<!-- JSTL视图 -->
+		<property name="viewResolvers">
+			<list>
+				<bean
+					class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+					<property name="prefix" value="/jsp/" />
+					<property name="suffix" value=".jsp" />
+					<property name="viewClass"
+						value="org.springframework.web.servlet.view.JstlView" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<!-- **************************************************************** -->
+	<!-- THYMELEAF-SPECIFIC ARTIFACTS -->
+	<!-- TemplateResolver <- TemplateEngine <- ViewResolver -->
+	<!-- **************************************************************** -->
+	<!-- <bean id="templateResolver" class="org.thymeleaf.templateresolver.ServletContextTemplateResolver"> 
+		<property name="prefix" value="/tpl" /> <property name="suffix" value=".html" 
+		/> <property name="templateMode" value="HTML5" /> </bean> <bean id="templateEngine" 
+		class="org.thymeleaf.spring3.SpringTemplateEngine"> <property name="templateResolver" 
+		ref="templateResolver" /> </bean> <bean class="org.thymeleaf.spring3.view.ThymeleafViewResolver"> 
+		<property name="templateEngine" ref="templateEngine" /> </bean> -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html; charset=utf-8</value>
+						</list>
+					</property>
+				</bean>
+				<bean
+					class="org.springframework.http.converter.ResourceHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.xml.SourceHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
+</beans>

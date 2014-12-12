@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xsi:schemaLocation="
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+		http://www.springframework.org/schema/cache
+		http://www.springframework.org/schema/cache/spring-cache.xsd
+		http://www.springframework.org/schema/util
+		http://www.springframework.org/schema/util/spring-util-3.2.xsd "
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.springframework.org/schema/beans" xmlns:cache="http://www.springframework.org/schema/cache"
+        xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util" default-lazy-init="true">
+
+    <!-- shiro配置 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager" />
+        <!-- 自定义的过滤链 -->
+        <property name="filters">
+            <util:map>
+                <!--<entry key="cas" value-ref="casFilter" />-->
+                <entry key="anyRoles" value-ref="anyRoles"/>
+            </util:map>
+        </property>
+        <property name="loginUrl" value="/unauthorized.jsp" />
+        <property name="successUrl" value="/unauthorized.jsp" />
+        <property name="unauthorizedUrl" value="/unauthorized.jsp" />
+        <property name="filterChainDefinitions">
+            <value>
+            	/jsp/check/**=anon
+            	<!-- /ws/**=anon -->
+                /assets/**=anon
+                /assemble/**=anon
+                /unauthorized.jsp = anon
+               <!--  /kaptcha/**=anon
+                /login.jsp=anon -->
+                /error.jsp=anon
+                /authc/authclogin=anon
+                /**=authc,anyRoles["admin"]
+               <!--  /**=authc ,anyRoles["admin","searcher"] -->
+            </value>
+        </property>
+    </bean>
+    <bean id="anyRoles" class="com.sinosoft.ie.shiro.filter.AnyOfRolesAuthorizationFilter"></bean>
+    <!-- security datasource: -->
+    <bean id="myRealm" class="com.sinosoft.ie.shiro.realm.CommonRealm">
+<!--         <property name="credentialsMatcher" ref="hashedMatcher"></property>
+ -->        <property name="powerManger" ref="powerManger"></property>
+    </bean>
+    <!--  <bean id="casRealm" class="org.apache.shiro.cas.CasRealm">
+       <property name="defaultRoles" value="ROLE_USER"/>
+       <property name="casServerUrlPrefix" value="http://localhost:8080/casServer"/>
+       &lt;!&ndash; 客户端的回调地址设置，必须和下面的shiro-cas过滤器拦截的地址一致 &ndash;&gt;
+       <property name="casService" value="http://localhost:8081/ehr"/>
+   </bean>-->
+    <!-- <bean id="casRealm" class="com.sinosoft.ie.shiro.realm.SinoCasReal">
+         <property name="cacheManager" ref="shiroCacheManager"/>
+         <property name="casServerUrlPrefix" value="http://192.168.104.180:8080/casServer"/>
+        &lt;!&ndash; 客户端的回调地址设置，必须和下面的shiro-cas过滤器拦截的地址一致 &ndash;&gt;
+         <property name="casService" value="http://192.168.104.180:8081/ehr/shiro-cas"/>
+         <property name="powerManger" ref="powerManger"></property>
+     </bean>-->
+    <!--<bean id="KaptchaFilter"
+        class="com.sinosoft.ie.shiro.filter.CaptchaFormAuthenticationFilter" />-->
+    <bean id="shiroCacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"></bean>
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- Single realm app. If you have multiple realms, use the 'realms' property
+            instead. -->
+        <property name="realm" ref="myRealm" />
+        <!-- By default the servlet container sessions will be used. Uncomment
+            this line to use shiro's native sessions (see the JavaDoc for more): -->
+        <property name="sessionMode" value="native" />
+        <property name="cacheManager" ref="shiroCacheManager"></property>
+    </bean>
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+    <!-- 开启Shiro注解的Spring配置方式的beans。在lifecycleBeanPostProcessor之后运行 -->
+    <!-- <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+        depends-on="lifecycleBeanPostProcessor" /> <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager" /> </bean> -->
+
+
+    <bean id="hashedMatcher"
+          class=" org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="SHA-256"></property>
+        <property name="storedCredentialsHexEncoded" value="false"></property>
+    </bean>
+    <!-- Define the Shiro Realm implementation you want to use to connect to
+        your back-end -->
+
+    <bean id="powerManger" class="com.sinosoft.ie.shiro.realm.PowerManger">
+        <property name="dsl" ref="dsl"></property>
+    </bean>
+
+    <bean id="propertyConfig"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location">
+            <value>classpath:db.properties</value>
+        </property>
+    </bean>
+
+
+    <!-- c3p0<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+        destroy-method="close"> <property name="driverClass" value="${jdbc.driverClass}"
+        /> <property name="jdbcUrl" value="${jdbc.jdbcUrl}" /> <property name="user"
+        value="${jdbc.user}" /> <property name="password" value="${jdbc.password}"
+        /> 初始化时获取的连接数，取值应在minPoolSize与maxPoolSize之间。Default: 3 <property name="initialPoolSize"
+        value="5" /> 连接池中保留的最小连接数。 <property name="minPoolSize" value="1" /> 连接池中保留的最大连接数。Default:
+        15 <property name="maxPoolSize" value="10" /> 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default:
+        0 <property name="maxIdleTime" value="600" /> 当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default:
+        3 <property name="acquireIncrement" value="5" /> 每60秒检查所有连接池中的空闲连接。Default:
+        0 <property name="idleConnectionTestPeriod" value="600" /> </bean> -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${jdbc.jdbcUrl}" />
+        <property name="username" value="${jdbc.user}" />
+        <property name="password" value="${jdbc.password}" />
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="1" />
+        <property name="minIdle" value="1" />
+        <property name="maxActive" value="20" />
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000" />
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+
+        <property name="validationQuery" value="SELECT 'x' from dual" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="20" />
+
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="stat" />
+    </bean>
+
+    <bean
+            class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+            id="transactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource">
+            <ref bean="dataSource" />
+        </property>
+    </bean>
+    <bean id="transactionAwareDataSource"
+          class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg ref="dataSource" />
+    </bean>
+    <bean class="org.jooq.impl.DataSourceConnectionProvider" name="connectionProvider">
+        <constructor-arg ref="transactionAwareDataSource" />
+    </bean>
+    <bean id="dsl" class="org.jooq.impl.DefaultDSLContext">
+        <constructor-arg ref="config" />
+    </bean>
+    <!-- Invoking an internal, package-private constructor for the example
+        Implement your own Configuration for more reliable behaviour -->
+    <bean class="org.jooq.impl.DefaultConfiguration" name="config">
+        <constructor-arg index="0" ref="connectionProvider" />
+        <constructor-arg index="1"><null /></constructor-arg>
+        <constructor-arg index="2"><null /></constructor-arg>
+        <constructor-arg index="3"><value type="org.jooq.SQLDialect">ORACLE</value></constructor-arg>
+        <constructor-arg index="4"><null /></constructor-arg>
+        <constructor-arg index="5"><null /></constructor-arg>
+    </bean>
+    <!-- 缓存注解驱动 -->
+    <cache:annotation-driven />
+    <!-- cacheManager工厂类 -->
+    <bean id="cacheManagerFactory"
+          class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+          p:configLocation="classpath:ehcache.xml" p:shared="false" />
+
+    <!-- 声明cacheManager -->
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager"
+          p:cacheManager-ref="cacheManagerFactory" />
+
+    <bean id="dicProvider" class="com.sinosoft.ie.provider.DicProvider" />
+    <bean id="xslProvider" class="com.sinosoft.ie.provider.XslProvider" />
+    <!-- providers -->
+    <bean id="providerManager" class="com.sinosoft.ie.provider.ProviderManager">
+        <property name="manager" ref="cacheManager"></property>
+        <property name="dsl" ref="dsl"></property>
+        <property name="providers">
+            <list>
+                <ref bean="dicProvider" />
+                <ref bean="xslProvider" />
+            </list>
+        </property>
+
+    </bean>
+
+    <!-- 验证码 -->
+    <bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">
+        <property name="config">
+            <bean class="com.google.code.kaptcha.util.Config">
+                <constructor-arg>
+                    <props>
+                        <prop key="kaptcha.border">yes</prop>
+                        <prop key="kaptcha.border.color">black</prop>
+                        <prop key="kaptcha.textproducer.font.color">black</prop>
+                        <prop key="kaptcha.image.width">80</prop>
+                        <prop key="kaptcha.textproducer.font.size">30</prop>
+                        <prop key="kaptcha.image.height">30</prop>
+                        <prop key="kaptcha.session.key">code</prop>
+                        <prop key="kaptcha.noise.color">52,152,219</prop>
+                        <prop key="kaptcha.textproducer.char.length">4</prop>
+                        <prop key="kaptcha.textproducer.char.string">0123456789</prop>
+                        <prop key="kaptcha.textproducer.font.names">Arial,Courier</prop>
+                    </props>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+</beans>
+

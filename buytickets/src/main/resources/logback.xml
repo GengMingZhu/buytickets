@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <configuration scan="true" scanPeriod="60 seconds" debug="false"> -->
+<configuration>
+	<contextName>ehr</contextName>
+	<property name="ehr" value="ehr" />
+	<property name="log.base" value="/tmp/ehrlog/" />
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+			by default -->
+		<encoder charset="utf-8">
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<appender name="logFile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder charset="utf-8">
+			<pattern>%d{HH:mm:ss.SSS} [%t] %-5le %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+		<file>${log.base}logFile.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- keep 30 days' worth of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>10MB</maxFileSize>
+		</triggeringPolicy>
+	</appender>
+	<logger name="org.springframework.jdbc" level="INFO" />
+	<root level="DEBUG">
+		<appender-ref ref="stdout" />
+		<appender-ref ref="logFile" />
+
+	</root>
+</configuration>

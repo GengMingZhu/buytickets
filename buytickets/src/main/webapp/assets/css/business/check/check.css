@@ -1,0 +1,130 @@
+#menuList {
+	margin: auto;
+	color: #333;
+	width: 95%;
+	position: fixed;
+	width: 70%;
+	top: 60px;
+	left: 100%;
+	padding-right: 30px;
+	background: #F5FFFA;
+	z-index: 999;
+}
+
+.menubox {
+	width: 100%;
+	height: 40px;
+	line-height: 40px;
+}
+
+.menubox li {
+	float: left;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fefefe),
+		to(#ededed) );
+	border: 1px solid #ccc;
+	border-bottom: 0px;
+	width: 100px;
+	text-align: center;
+	position: relative;
+	cursor: pointer;
+}
+
+.menubox .hover {
+	background: #fff;
+}
+
+.content_x {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow-x: scroll;
+}
+
+html
+{
+	scrollbar-base-color: #c2c2c2;
+	scrollbar-3dlight-color: #c2c2c2;
+	scrollbar-highlight-color: #c2c2c2;
+	scrollbar-track-color: #eee;
+	scrollbar-arrow-color: #000;
+	scrollbar-shadow-color: #c2c2c2;
+	scrollbar-dark-shadow-color: black;
+}
+::-webkit-scrollbar {
+	width:6px;
+	height:6px;
+}
+::-webkit-scrollbar-thumb {
+	background-color:#c2c2c2;
+	background-clip:padding-box;
+	border:1px solid #979797;
+	min-height:28px;
+}
+::-webkit-scrollbar-thumb:hover {
+	border:1px solid #636363;
+	background-color:#929292;
+}
+
+.table1 {
+	display: table;
+	border-collapse: separate;
+	border-top: 0px solid #ccc;
+	border-left: 0px solid #ccc;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+
+.table1 .row {
+	display: table-row;
+	height: 35px;
+	line-height: 35px;
+}
+
+.table1 .row div {
+	display: table-cell;
+	border: 1px solid #ccc;
+	border-bottom: 0px;
+	padding: 3px 10px 3px 10px;;
+}
+
+.table1 .row .col_title_blank {
+	border: 1px solid #ccc;
+	width: auto;
+	border-bottom: 0px;
+}
+
+.table1 .row .col_blank {
+	width: auto;
+}
+
+.table1 .row .col_title {
+	width: auto;
+	text-align: center;
+	border: 1px solid #ccc;
+	border-bottom: 0px solid #ccc;
+	border-left: 0px;
+	white-space:nowrap;
+}
+
+.table1 .row .col {
+	width: auto;
+	border-left: 0px;
+	white-space:nowrap;
+}
+
+.nav-pills>li>a>.badge {
+	margin-left: 3px;
+}
+
+.badge {
+	display: inline-block;
+	padding: 3px 15px;
+	font-weight: 700;
+	line-height: 1;
+	color: #fff;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: baseline;
+	background-color: #bce8f1;
+	border-radius: 10px;
+}
