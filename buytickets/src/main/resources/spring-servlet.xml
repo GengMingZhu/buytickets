@@ -27,7 +27,7 @@
 	<!-- <mvc:default-servlet-handler /> -->
 	
 	<!-- 启动包扫描功能，以便注册带有@Controller、@Service、@repository、@Component等注解的类成为spring的bean -->
-	<context:component-scan base-package="com.sinosoft.ie">
+	<context:component-scan base-package="com.ie">
 		<!-- <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" 
 			/> -->
 		<!-- <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" 
@@ -38,7 +38,7 @@
 	<!-- 启动注解驱动的Spring MVC功能，注册请求url和注解POJO类方法的映射 -->
 	<mvc:annotation-driven />
 	 <!-- 缓存注解驱动 -->
-    <cache:annotation-driven cache-manager="cacheManager"/>
+    <!-- <cache:annotation-driven cache-manager="cacheManager"/> -->
 	<!-- <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" 
 		/> <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"> 
 		<property name="messageConverters"> <list> <bean class="org.springframework.http.converter.StringHttpMessageConverter"> 
